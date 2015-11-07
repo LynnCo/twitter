@@ -1,9 +1,10 @@
 # internal
+import re
 import time
 
 # external
 import flask
-from twython import Twython
+import twython
 
 # local
 from env import ENV
@@ -16,9 +17,11 @@ app = flask.Flask(__name__)
 app.config['SECRET_KEY'] = ENV['SECRET_KEY']
 
 # twython object
-twitter = Twython(
+twitter = twython.Twython(
     ENV['API_KEY'],
     ENV['API_SECRET'],
+    ENV['ACCESS_TOKEN'],
+    ENV['TOKEN_SECRET'],
 )
 
 
@@ -47,7 +50,7 @@ def force_unfollow_fans(twitter):
 
 @app.route('/')
 def index():
-    return 'go to /login'
+    return flask.render_template('index.html')
 
 @app.route('/login')
 def login():
@@ -59,14 +62,14 @@ def login():
 
 @app.route('/callback')
 def callback():
-    twitter = Twython(
+    twitter = twython.Twython(
         ENV['API_KEY'],
         ENV['API_SECRET'],
         flask.session['oauth_token'],
         flask.session['oauth_token_secret'],
     )
     auth_creds = twitter.get_authorized_tokens(flask.request.args['oauth_verifier'])
-    twitter = Twython(
+    twitter = twython.Twython(
         ENV['API_KEY'],
         ENV['API_SECRET'],
         auth_creds['oauth_token'],
@@ -77,4 +80,8 @@ def callback():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=int(ENV['PORT']))
+    app.run(
+        debug=False,
+        port=int(ENV['PORT']),
+        host='0.0.0.0',
+    )
