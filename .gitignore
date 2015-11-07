@@ -2,6 +2,8 @@
 
 *.pyc
 
+words/*.txt
+
 test/
 venv/
 __pycache__/
